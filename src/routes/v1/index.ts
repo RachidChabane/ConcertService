@@ -2,11 +2,17 @@ import express from 'express';
 import authRoute from './auth.route';
 import userRoute from './user.route';
 import docsRoute from './docs.route';
+import concertRoute from './concert.route';
 import config from '../../config/config';
+import path from 'path';
 
 const router = express.Router();
 
 const defaultRoutes = [
+  {
+    path: '/concert',
+    route: concertRoute
+  },
   {
     path: '/auth',
     route: authRoute

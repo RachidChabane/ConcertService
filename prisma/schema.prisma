@@ -34,6 +34,18 @@ model Token {
   userId      Int
 }
 
+model Concert {
+  id         String   @id @default(uuid()) @db.Uuid
+  title      String
+  location   String
+  date       DateTime
+  maxSeats   Int
+  status     String
+  deletedAt  DateTime? @db.Timestamptz
+  createdAt  DateTime @default(now()) @db.Timestamptz
+  updatedAt  DateTime @updatedAt @db.Timestamptz
+}
+
 enum Role {
   USER
   ADMIN

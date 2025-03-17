@@ -6,7 +6,7 @@
 ```npm install```
 
 - Lancer la base de données :  
-```docker:dev-db:start```
+```npm run docker:dev-db:start```
 
 - Lancer le serveur :  
 ```npm run dev```
