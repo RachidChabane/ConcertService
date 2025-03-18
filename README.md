@@ -8,5 +8,8 @@
 - Lancer la base de données :  
 ```npm run docker:dev-db:start```
 
+- Générer les models prisma
+```npm run db:push```
+
 - Lancer le serveur :  
 ```npm run dev```
