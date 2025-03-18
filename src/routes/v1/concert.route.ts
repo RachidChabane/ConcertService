@@ -1,10 +1,13 @@
 import exp from 'constants';
 import express from 'express';
 import { concertController } from '../../controllers';
+import multer from 'multer';
 
 const router = express.Router();
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
-router.route('/createConcert').post(concertController.createConcert);
+router.route('/createConcert').post(upload.single('image'), concertController.createConcert);
 
 router.route('/getConcerts').get(concertController.getConcerts);
 
@@ -23,17 +26,53 @@ export default router;
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Concert:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           format: uuid
+ *         title:
+ *           type: string
+ *         location:
+ *           type: string
+ *         date:
+ *           type: string
+ *           format: date-time
+ *         maxSeats:
+ *           type: integer
+ *         status:
+ *           type: string
+ *         image:
+ *           type: string
+ *           format: binary
+ *         deletedAt:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ */
+
+/**
+ * @swagger
  * /concerts:
  *   post:
  *     summary: Create a concert
- *     description: Create a new concert.
+ *     description: Create a new concert with an optional image.
  *     tags: [Concerts]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             required:
@@ -54,12 +93,9 @@ export default router;
  *                 type: integer
  *               status:
  *                 type: string
- *             example:
- *               title: Rock Festival
- *               location: Paris
- *               date: "2025-06-15T20:00:00Z"
- *               maxSeats: 5000
- *               status: scheduled
+ *               image:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       "201":
  *         description: Created

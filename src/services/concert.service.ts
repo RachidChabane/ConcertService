@@ -5,13 +5,14 @@ import httpStatus from 'http-status';
 
 
 /**
- * Créer un concert
+ * Créer un concert avec image en BLOB
  * @param {string} title
  * @param {string} location
  * @param {Date} date
  * @param {number} maxSeats
  * @param {string} status
- * @returns {Promise<Concert>} - Le concert créée
+ * @param {Buffer} image
+ * @returns {Promise<Concert>} - Le concert créé
  */
 const createConcert = async (
     title: string,
@@ -19,6 +20,7 @@ const createConcert = async (
     date: Date,
     maxSeats: number,
     status: string,
+    image?: Buffer, // Image en option
 ): Promise<Concert> => {
     // Vérifier si un concert au même endroit et à la même date existe déjà
     const existingConcert = await prisma.concert.findFirst({
@@ -27,11 +29,11 @@ const createConcert = async (
             date,
         },
     });
-    
+
     if (existingConcert) {
         throw new ApiError(httpStatus.BAD_REQUEST, "A concert at this location and time already exists");
     }
-    
+
     return prisma.concert.create({
         data: {
             title,
@@ -39,6 +41,7 @@ const createConcert = async (
             date,
             maxSeats,
             status,
+            image,
         },
     });
 };

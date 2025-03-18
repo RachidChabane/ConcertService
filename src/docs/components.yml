@@ -16,6 +16,18 @@ components:
           type: integer
         status:
           type: string
+        image:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - Buffer
+            data:
+              type: array
+              items:
+                type: integer
+                description: "Byte array representing the image"
         deletedAt:
           type: string
           format: date-time
@@ -33,6 +45,9 @@ components:
         date: "2025-07-15T19:00:00Z"
         maxSeats: 5000
         status: "scheduled"
+        image:
+          type: "Buffer"
+          data: [255, 216, 255, 224, 0, 16]
         deletedAt: null
         createdAt: "2025-03-18T12:00:00Z"
         updatedAt: "2025-03-18T12:00:00Z"

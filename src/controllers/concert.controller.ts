@@ -5,7 +5,11 @@ import { concertService } from "../services";
 
 const createConcert = catchAsync(async (req, res) => {
     const {title, location, date, maxSeats, status} = req.body;
-    const concert = await concertService.createConcert(title, location, date, maxSeats, status);
+    const image = req.file ? req.file.buffer : undefined;
+
+    const maxSeatsAsNumber = parseInt(maxSeats, 10);
+
+    const concert = await concertService.createConcert(title, location, date, maxSeatsAsNumber, status, image);
     res.status(httpStatus.CREATED).send(concert);
 });
 
