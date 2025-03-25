@@ -8,11 +8,8 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 router.route('/createConcert').post(upload.single('image'), concertController.createConcert);
-
 router.route('/getConcerts').get(concertController.getConcerts);
-
 router.route('/getConcert/:concertId').get(concertController.getConcert);
-
 router.route('/deleteConcert/:concertId').delete(concertController.deleteConcert);
 
 export default router;
@@ -62,7 +59,7 @@ export default router;
 
 /**
  * @swagger
- * /concerts:
+ * /concert/createConcert:
  *   post:
  *     summary: Create a concert
  *     description: Create a new concert with an optional image.
@@ -105,7 +102,11 @@ export default router;
  *                $ref: '#/components/schemas/Concert'
  *       "400":
  *         description: Bad request
- *
+ */
+
+/**
+ * @swagger
+ * /concert/getConcerts:
  *   get:
  *     summary: Get all concerts
  *     description: Retrieve all concerts.
@@ -123,14 +124,14 @@ export default router;
 
 /**
  * @swagger
- * /concerts/{id}:
+ * /concert/getConcert/{concertId}:
  *   get:
  *     summary: Get a concert
  *     description: Retrieve a concert by ID.
  *     tags: [Concerts]
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: concertId
  *         required: true
  *         schema:
  *           type: string
@@ -144,14 +145,18 @@ export default router;
  *                $ref: '#/components/schemas/Concert'
  *       "404":
  *         description: Concert not found
- *
+ */
+
+/**
+ * @swagger
+ * /concert/deleteConcert/{concertId}:
  *   delete:
  *     summary: Delete a concert
  *     description: Logically delete a concert by ID.
  *     tags: [Concerts]
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: concertId
  *         required: true
  *         schema:
  *           type: string

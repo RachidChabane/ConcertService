@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 setupTestDB();
 
 describe('Concerts API', () => {
-    describe('GET /v1/getConcerts', () => {
+    describe('GET /v1/concert/getConcerts', () => {
         test('should return 200 and all concerts', async () => {
             const res = await request(app)
                 .get('/v1/concert/getConcerts')
