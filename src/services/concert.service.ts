@@ -100,4 +100,37 @@ const deleteConcertById = async (concertId: string): Promise<Concert> => {
     });
 };
 
-export default { createConcert, getConcerts, getConcertById, deleteConcertById };
+/**
+* Mettre à jour un concert par son ID
+* @param {string} concertId
+* @param {string} title
+* @param {string} location
+* @param {Date} date
+* @param {number} maxSeats
+* @param {string} status
+* @param {Buffer} image
+* @returns {Promise<Concert>}
+*/
+const updateConcertById = async (concertId: string, title?: string, location?: string, date?: Date, maxSeats?: number, status?: string, image?: Buffer): Promise<Concert> => {
+    const existingConcert = await prisma.concert.findUnique({
+        where: { id: concertId },
+    });
+
+    if (!existingConcert) {
+        throw new ApiError(httpStatus.NOT_FOUND, "Concert not found");
+    }
+    return prisma.concert.update({
+        where: { id: concertId },
+        data: {
+            title: title ?? existingConcert.title,
+            location: location ?? existingConcert.location,
+            date: date ?? existingConcert.date,
+            maxSeats: maxSeats ?? existingConcert.maxSeats,
+            status: status ?? existingConcert.status,
+            image: image ?? existingConcert.image,
+        },
+    });
+}
+
+
+export default { createConcert, getConcerts, getConcertById, deleteConcertById, updateConcertById };

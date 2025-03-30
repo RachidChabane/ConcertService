@@ -1,4 +1,3 @@
-import exp from 'constants';
 import express from 'express';
 import { concertController } from '../../controllers';
 import multer from 'multer';
@@ -11,6 +10,7 @@ router.route('/createConcert').post(upload.single('image'), concertController.cr
 router.route('/getConcerts').get(concertController.getConcerts);
 router.route('/getConcert/:concertId').get(concertController.getConcert);
 router.route('/deleteConcert/:concertId').delete(concertController.deleteConcert);
+router.route('/updateConcert/:concertId').put(upload.single('image'), concertController.updateConcert);
 
 export default router;
 
@@ -164,6 +164,52 @@ export default router;
  *     responses:
  *       "200":
  *         description: No content
+ *       "404":
+ *         description: Concert not found
+ */
+
+/**
+ * @swagger
+ * /concert/updateConcert/{concertId}:
+ *   put:
+ *     summary: Update a concert
+ *     description: Update an existing concert by ID. Fields that are not provided will retain their current values.
+ *     tags: [Concerts]
+ *     parameters:
+ *       - in: path
+ *         name: concertId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Concert ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               location:
+ *                 type: string
+ *               date:
+ *                 type: string
+ *                 format: date-time
+ *               maxSeats:
+ *                 type: integer
+ *               status:
+ *                 type: string
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *                $ref: '#/components/schemas/Concert'
  *       "404":
  *         description: Concert not found
  */

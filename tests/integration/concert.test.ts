@@ -75,4 +75,35 @@ describe('Concerts API', () => {
                 .expect(httpStatus.NOT_FOUND);
         });
     });
+
+    describe('PUT /v1/concert/updateConcert/:concertId', () => {
+        test('should return 200 and successfully update concert if data is ok', async () => {
+            const concert = await concertService.createConcert("Test Concert", "Test Location", new Date(), 100, "active");
+
+            const updatedConcert = {
+                title: "Updated Concert",
+                location: "Updated Location",
+                date: new Date().toISOString(),
+                maxSeats: 150,
+                status: "inactive"
+            };
+
+            const res = await request(app)
+                .put(`/v1/concert/updateConcert/${concert.id}`)
+                .send(updatedConcert)
+                .expect(httpStatus.OK);
+
+            expect(res.body).toHaveProperty('id', concert.id);
+            expect(res.body.title).toBe(updatedConcert.title);
+        });
+
+        test('should return 404 error if concert is not found', async () => {
+            const fakeId = uuidv4();
+
+            await request(app)
+                .put(`/v1/concert/updateConcert/${fakeId}`)
+                .expect(httpStatus.NOT_FOUND);
+        });
+    }
+    );
 });

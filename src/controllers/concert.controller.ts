@@ -35,9 +35,36 @@ const deleteConcert = catchAsync(async (req, res) => {
 
 });
 
+const updateConcert = catchAsync(async (req, res) => {
+    const { title, location, date, maxSeats, status } = req.body;
+    const image = req.file ? req.file.buffer : undefined;
+
+    const sanitizedTitle = title === '' ? undefined : title;
+    const sanitizedLocation = location === '' ? undefined : location;
+    const sanitizedDate = date === '' ? undefined : date;
+    const sanitizedStatus = status === '' ? undefined : status;
+    const maxSeatsAsNumber = maxSeats === '' ? undefined : maxSeats ? parseInt(maxSeats, 10) : undefined;
+
+    const concert = await concertService.updateConcertById(
+        req.params.concertId,
+        sanitizedTitle,
+        sanitizedLocation,
+        sanitizedDate,
+        maxSeatsAsNumber,
+        sanitizedStatus,
+        image
+    );
+    if (!concert) {
+        throw new ApiError(httpStatus.NOT_FOUND, "Concert not found");
+    }
+    res.status(200).send(concert);
+});
+
+
 export default {
     createConcert,
     getConcerts,
     getConcert,
-    deleteConcert
+    deleteConcert,
+    updateConcert
 };
