@@ -1,0 +1,105 @@
+components:
+  schemas:
+    Concert:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        location:
+          type: string
+        date:
+          type: string
+          format: date-time
+        maxSeats:
+          type: integer
+        status:
+          type: string
+        image:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - Buffer
+            data:
+              type: array
+              items:
+                type: integer
+                description: "Byte array representing the image"
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      example:
+        id: 123e4567-e89b-12d3-a456-426614174000
+        title: "Rock Festival 2025"
+        location: "Paris, France"
+        date: "2025-07-15T19:00:00Z"
+        maxSeats: 5000
+        status: "scheduled"
+        image:
+          type: "Buffer"
+          data: [255, 216, 255, 224, 0, 16]
+        deletedAt: null
+        createdAt: "2025-03-18T12:00:00Z"
+        updatedAt: "2025-03-18T12:00:00Z"
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: number
+        message:
+          type: string
+
+  responses:
+    DuplicateEmail:
+      description: Email already taken
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 400
+            message: Email already taken
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 401
+            message: Please authenticate
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 403
+            message: Forbidden
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 404
+            message: Not found
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
