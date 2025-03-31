@@ -3,10 +3,20 @@ import app from '../../src/app';
 import setupTestDB from '../utils/setupTestDb';
 import httpStatus from 'http-status';
 import { concertService } from '../../src/services';
-import { describe, expect, test } from '@jest/globals';
-import { v4 as uuidv4 } from 'uuid'; 
+import { describe, expect, test, jest, beforeEach } from '@jest/globals';
+import mqConnection from '../../src/config/rabbitmq';
+import { v4 as uuidv4 } from 'uuid';
 
 setupTestDB();
+
+jest.mock('../../src/config/rabbitmq', () => ({
+  connect: jest.fn(),
+  sendToQueue: jest.fn()
+}));
+
+beforeEach(() => {
+  jest.clearAllMocks(); // Réinitialise tous les mocks avant chaque test
+});
 
 describe('Concerts API', () => {
     describe('GET /v1/concert/getConcerts', () => {
@@ -56,6 +66,29 @@ describe('Concerts API', () => {
             expect(res.body).toHaveProperty('id');
             expect(res.body.title).toBe(newConcert.title);
         });
+
+        test('should send a message to RabbitMQ when a concert is created', async () => {
+            const newConcert = {
+              title: 'Test Concert',
+              location: 'Test Location',
+              date: new Date().toISOString(),
+              maxSeats: 100,
+              status: 'active'
+            };
+      
+            const res = await request(app)
+              .post('/v1/concert/createConcert')
+              .send(newConcert)
+              .expect(httpStatus.CREATED);
+      
+            expect(mqConnection.sendToQueue).toHaveBeenCalledWith(
+              'concert.created',
+              expect.objectContaining({
+                id: res.body.id,
+                title: newConcert.title
+              })
+            );
+          });
     });
 
     describe('DELETE /v1/concert/deleteConcert/:concertId', () => {
@@ -74,6 +107,28 @@ describe('Concerts API', () => {
                 .delete(`/v1/concert/deleteConcert/${fakeId}`)
                 .expect(httpStatus.NOT_FOUND);
         });
+
+        test('should send a message to RabbitMQ when a concert is deleted', async () => {
+            const concert = await concertService.createConcert(
+              'Test Concert',
+              'Test Location',
+              new Date(),
+              100,
+              'active'
+            );
+      
+            await request(app)
+              .delete(`/v1/concert/deleteConcert/${concert.id}`)
+              .expect(httpStatus.OK);
+      
+            expect(mqConnection.sendToQueue).toHaveBeenCalledWith(
+              'concert.deleted',
+              expect.objectContaining({
+                id: concert.id,
+                deletedAt: expect.any(Date)
+              })
+            );
+          });
     });
 
     describe('PUT /v1/concert/updateConcert/:concertId', () => {
