@@ -1,8 +1,8 @@
-import {Concert} from '@prisma/client';
+import { Concert } from '@prisma/client';
 import prisma from '../client';
 import ApiError from '../utils/ApiError';
 import httpStatus from 'http-status';
-
+import mqConnection from '../config/rabbitmq';
 
 /**
  * Créer un concert avec image en BLOB
@@ -15,35 +15,39 @@ import httpStatus from 'http-status';
  * @returns {Promise<Concert>} - Le concert créé
  */
 const createConcert = async (
-    title: string,
-    location: string,
-    date: Date,
-    maxSeats: number,
-    status: string,
-    image?: Buffer, // Image en option
+  title: string,
+  location: string,
+  date: Date,
+  maxSeats: number,
+  status: string,
+  image?: Buffer
 ): Promise<Concert> => {
-    // Vérifier si un concert au même endroit et à la même date existe déjà
-    const existingConcert = await prisma.concert.findFirst({
-        where: {
-            location,
-            date,
-        },
-    });
-
-    if (existingConcert) {
-        throw new ApiError(httpStatus.BAD_REQUEST, "A concert at this location and time already exists");
+  // Vérifier si un concert au même endroit et à la même date existe déjà
+  const existingConcert = await prisma.concert.findFirst({
+    where: {
+      location,
+      date
     }
+  });
 
-    return prisma.concert.create({
-        data: {
-            title,
-            location,
-            date,
-            maxSeats,
-            status,
-            image,
-        },
-    });
+  if (existingConcert) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "A concert at this location and time already exists");
+  }
+
+  const concert = await prisma.concert.create({
+    data: {
+      title,
+      location,
+      date,
+      maxSeats,
+      status,
+      image
+    }
+  });
+
+  await mqConnection.sendToQueue('concert.created', concert);
+
+  return concert;
 };
 
 /**
@@ -51,14 +55,14 @@ const createConcert = async (
 * @returns {Promise<Concert[]>} - Liste des concerts non supprimés
 */
 const getConcerts = async (): Promise<Concert[]> => {
-    return prisma.concert.findMany({
-        where: {
-            deletedAt: null,
-        },
-        orderBy: {
-            date: "asc",
-        },
-    });
+  return prisma.concert.findMany({
+    where: {
+      deletedAt: null
+    },
+    orderBy: {
+      date: "asc"
+    }
+  });
 };
 
 /**
@@ -67,15 +71,15 @@ const getConcerts = async (): Promise<Concert[]> => {
 * @returns {Promise<Concert>} - Le concert trouvé
 */
 const getConcertById = async (concertId: string): Promise<Concert> => {
-    const concert = await prisma.concert.findUnique({
-        where: { id: concertId},
-    });
-    
-    if (!concert) {
-        throw new ApiError(httpStatus.NOT_FOUND, "Concert not found");
-    }
-    
-    return concert;
+  const concert = await prisma.concert.findUnique({
+    where: { id: concertId }
+  });
+
+  if (!concert) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Concert not found");
+  }
+
+  return concert;
 };
 
 /**
@@ -84,20 +88,24 @@ const getConcertById = async (concertId: string): Promise<Concert> => {
 * @returns {Promise<Concert>} - Le concert supprimé (marqué comme supprimé)
 */
 const deleteConcertById = async (concertId: string): Promise<Concert> => {
-    const existingConcert = await prisma.concert.findUnique({
-        where: { id: concertId },
-    });
-    
-    if (!existingConcert) {
-        throw new ApiError(httpStatus.NOT_FOUND, "Concert not found");
+  const existingConcert = await prisma.concert.findUnique({
+    where: { id: concertId }
+  });
+
+  if (!existingConcert) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Concert not found");
+  }
+
+  const updatedConcert = await prisma.concert.update({
+    where: { id: concertId },
+    data: {
+      deletedAt: new Date() // Marque comme supprimé au lieu de l'effacer
     }
-    
-    return prisma.concert.update({
-        where: { id: concertId },
-        data: {
-            deletedAt: new Date(), // Marque comme supprimé au lieu de l'effacer
-        },
-    });
+  });
+
+  await mqConnection.sendToQueue('concert.deleted', updatedConcert);
+
+  return updatedConcert;
 };
 
 /**
@@ -112,25 +120,24 @@ const deleteConcertById = async (concertId: string): Promise<Concert> => {
 * @returns {Promise<Concert>}
 */
 const updateConcertById = async (concertId: string, title?: string, location?: string, date?: Date, maxSeats?: number, status?: string, image?: Buffer): Promise<Concert> => {
-    const existingConcert = await prisma.concert.findUnique({
-        where: { id: concertId },
-    });
+  const existingConcert = await prisma.concert.findUnique({
+    where: { id: concertId }
+  });
 
-    if (!existingConcert) {
-        throw new ApiError(httpStatus.NOT_FOUND, "Concert not found");
+  if (!existingConcert) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Concert not found");
+  }
+  return prisma.concert.update({
+    where: { id: concertId },
+    data: {
+      title: title ?? existingConcert.title,
+      location: location ?? existingConcert.location,
+      date: date ?? existingConcert.date,
+      maxSeats: maxSeats ?? existingConcert.maxSeats,
+      status: status ?? existingConcert.status,
+      image: image ?? existingConcert.image
     }
-    return prisma.concert.update({
-        where: { id: concertId },
-        data: {
-            title: title ?? existingConcert.title,
-            location: location ?? existingConcert.location,
-            date: date ?? existingConcert.date,
-            maxSeats: maxSeats ?? existingConcert.maxSeats,
-            status: status ?? existingConcert.status,
-            image: image ?? existingConcert.image,
-        },
-    });
+  });
 }
-
 
 export default { createConcert, getConcerts, getConcertById, deleteConcertById, updateConcertById };
