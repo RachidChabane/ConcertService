@@ -1,43 +1,56 @@
 components:
   schemas:
-    User:
+    Concert:
       type: object
       properties:
         id:
           type: string
-        email:
+        title:
           type: string
-          format: email
-        name:
+        location:
           type: string
-        role:
+        date:
           type: string
-          enum: [USER, ADMIN]
-      example:
-        id: 5ebac534954b54139806c112
-        email: fake@example.com
-        name: fake name
-        role: USER
-
-    Token:
-      type: object
-      properties:
-        token:
+          format: date-time
+        maxSeats:
+          type: integer
+        status:
           type: string
-        expires:
+        image:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - Buffer
+            data:
+              type: array
+              items:
+                type: integer
+                description: "Byte array representing the image"
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
           type: string
           format: date-time
       example:
-        token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZWJhYzUzNDk1NGI1NDEzOTgwNmMxMTIiLCJpYXQiOjE1ODkyOTg0ODQsImV4cCI6MTU4OTMwMDI4NH0.m1U63blB0MLej_WfB7yC2FTMnCziif9X8yzwDEfJXAg
-        expires: 2020-05-12T16:18:04.793Z
-
-    AuthTokens:
-      type: object
-      properties:
-        access:
-          $ref: '#/components/schemas/Token'
-        refresh:
-          $ref: '#/components/schemas/Token'
+        id: 123e4567-e89b-12d3-a456-426614174000
+        title: "Rock Festival 2025"
+        location: "Paris, France"
+        date: "2025-07-15T19:00:00Z"
+        maxSeats: 5000
+        status: "scheduled"
+        image:
+          type: "Buffer"
+          data: [255, 216, 255, 224, 0, 16]
+        deletedAt: null
+        createdAt: "2025-03-18T12:00:00Z"
+        updatedAt: "2025-03-18T12:00:00Z"
 
     Error:
       type: object
