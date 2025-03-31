@@ -1,9 +1,9 @@
 {
-  "name": "prisma-express-typescript-boilerplate",
+  "name": "concerts-api",
   "version": "1.0.0",
-  "description": "REST API Boilerplate with Node JS, TypeScript, Express and Prisma",
+  "description": "REST API Concerts with Node JS, TypeScript, Express and Prisma",
   "main": "src/index.ts",
-  "repository": "https://github.com/antonio-lazaro/prisma-express-typescript-boilerplate.git",
+  "repository": "https://github.com/RachidChabane/ConcertService.git",
   "scripts": {
     "start": "npm run build && node build/src/index.js",
     "dev": "cross-env NODE_ENV=development nodemon src/index.ts",
